@@ -11,7 +11,7 @@ import {
 import L from "leaflet";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-import { MarkerClusterGroup } from "react-leaflet-cluster";
+import MarkerClusterGroup from "react-leaflet-cluster";
 
 // Keeps the map centered on `center` whenever it changes (e.g. once geolocation resolves).
 function Recenter({ center }) {

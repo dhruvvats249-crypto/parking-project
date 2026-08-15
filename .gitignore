@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Environment files (contain real secrets - never commit these)
+.env
+.env.local
+
+# Build output
+dist/
+build/
+
+# OS/editor cruft
+.DS_Store
+*.log

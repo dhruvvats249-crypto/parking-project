@@ -3,7 +3,6 @@ const { searchNearbyLots } = require("./lots");
 
 const router = express.Router();
 
-Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
 const MODEL = "llama-3.3-70b-versatile";
 
 const SEARCH_TOOL = {

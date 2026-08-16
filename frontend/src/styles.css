@@ -27,6 +27,35 @@
   --font-mono: "JetBrains Mono", monospace;
 }
 
+/* Light theme */
+[data-theme="light"] {
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-alt: #f1f5f9;
+  --border: #e2e8f0;
+  --ink: #0f172a;
+  --ink-muted: #475569;
+  --brand: #0052ff;
+  --brand-dark: #0038b6;
+  --brand-tint: rgba(0, 82, 255, 0.12);
+  --danger: #ef4444;
+  --danger-tint: rgba(239, 68, 68, 0.12);
+  --success: #10b981;
+  --success-tint: rgba(16, 185, 129, 0.12);
+  --cta: #f97316;
+  --cta-dark: #c2560c;
+  --accent-blue: #3b82f6;
+  --accent-blue-tint: rgba(59, 130, 246, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* Skeleton loaders - theme aware */
+[data-theme="light"] {
+  --skeleton-base: #e2e8f0;
+  --skeleton-highlight: #f1f5f9;
+}
+
 * { box-sizing: border-box; }
 
 html, body, #root { height: 100%; }
@@ -97,6 +126,23 @@ button { font-family: inherit; }
 .nav-links a:hover { color: var(--ink); text-decoration: none; }
 .nav-auth { display: flex; align-items: center; gap: 12px; }
 .nav-user { color: var(--ink-muted); font-size: 0.9rem; margin-right: 4px; }
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: var(--bg);
+  border-color: var(--border);
+}
+.theme-toggle:hover {
+  background: var(--surface-alt);
+  transform: translateY(-1px);
+}
 
 .nav-burger {
   display: none;

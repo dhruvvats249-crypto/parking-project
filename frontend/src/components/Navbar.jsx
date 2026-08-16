@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -52,6 +54,15 @@ export default function Navbar() {
           </>
         )}
       </div>
+
+      <button
+        className="btn btn-ghost theme-toggle"
+        onClick={toggleTheme}
+        aria-label={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      >
+        {resolvedTheme === "dark" ? "☀️" : "🌙"}
+      </button>
 
       <button
         className={`nav-burger ${menuOpen ? "open" : ""}`}

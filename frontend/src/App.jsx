@@ -17,13 +17,15 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CheckIn from "./pages/CheckIn";
 import ScanCheckIn from "./pages/ScanCheckIn";
 import AssistantWidget from "./components/AssistantWidget";
+import { ThemeProvider } from "./context/ThemeContext";
 
 export default function App() {
   return (
-    <div className="app-shell">
-      <Navbar />
-      <main className="app-main">
-        <Routes>
+    <ThemeProvider>
+      <div className="app-shell">
+        <Navbar />
+        <main className="app-main">
+          <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/find" element={<FindParking />} />
           <Route path="/lots/:id" element={<LotDetail />} />
@@ -98,5 +100,6 @@ export default function App() {
       </main>
       <AssistantWidget />
     </div>
+    </ThemeProvider>
   );
 }

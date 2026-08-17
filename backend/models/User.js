@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password_hash: { type: String, required: true },
   created_at: { type: String, default: () => new Date().toISOString() },
+  saved_lots: [{ type: String, ref: "ParkingLot" }],
 });
 
 applyIdTransform(userSchema);

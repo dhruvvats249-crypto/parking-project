@@ -35,9 +35,10 @@ export const api = {
     request("/api/auth/login", { method: "POST", body: { email, password } }),
   me: (token) => request("/api/auth/me", { token }),
 
-  nearbyLots: ({ lat, lng, radiusKm, shade, at, until }) => {
+  nearbyLots: ({ lat, lng, radiusKm, shade, maxPricePerHour, at, until }) => {
     const params = new URLSearchParams({ lat, lng, radius_km: radiusKm ?? 5 });
     if (shade) params.set("shade", "true");
+    if (maxPricePerHour) params.set("max_price_per_hour", String(maxPricePerHour));
     if (at) params.set("at", at);
     if (until) params.set("until", until);
     return request(`/api/lots/nearby?${params.toString()}`);
@@ -51,6 +52,8 @@ export const api = {
   },
   createLot: (token, payload) => request("/api/lots", { method: "POST", body: payload, token }),
   myLots: (token) => request("/api/lots/mine/list", { token }),
+  savedLots: (token) => request("/api/lots/saved", { token }),
+  toggleSaveLot: (token, lotId) => request(`/api/lots/${lotId}/save`, { method: "POST", token }),
 
   createBooking: (token, payload) => request("/api/bookings", { method: "POST", body: payload, token }),
   myBookings: (token) => request("/api/bookings/mine", { token }),

@@ -537,6 +537,34 @@ button { font-family: inherit; }
 .badge.price { background: var(--accent-blue-tint); color: var(--accent-blue); }
 .empty-state { color: var(--ink-muted); text-align: center; padding: 40px 12px; font-size: 0.9rem; }
 
+/* Save button on lot cards */
+.save-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+.save-btn:hover:not(:disabled) {
+  background: var(--bg);
+  transform: scale(1.1);
+}
+.save-btn.saved {
+  background: var(--danger-tint);
+  border-color: var(--danger);
+}
+.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ---------- Lot detail ---------- */
 .lot-detail { max-width: 1080px; margin: 0 auto; padding: 28px 32px 60px; }
 .lot-detail-header { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }

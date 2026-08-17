@@ -4,6 +4,7 @@ const ParkingLot = require("../models/ParkingLot");
 const Slot = require("../models/Slot");
 const Booking = require("../models/Booking");
 const Subscription = require("../models/Subscription");
+const User = require("../models/User");
 const { distanceKm } = require("../utils/geo");
 const { requireAuth } = require("../middleware/auth");
 
@@ -179,6 +180,48 @@ router.get("/mine/list", requireAuth, async (req, res, next) => {
     const now = new Date().toISOString();
     const result = await Promise.all(lots.map((l) => lotWithAvailability(l, now, now)));
     res.json({ lots: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /api/lots/saved -> get user's saved lots
+router.get("/saved", requireAuth, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).populate("saved_lots");
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const now = new Date().toISOString();
+    const result = await Promise.all(
+      (user.saved_lots || []).map((l) => lotWithAvailability(l, now, now))
+    );
+    res.json({ lots: result });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// POST /api/lots/:id/save -> toggle save/unsave a lot
+router.post("/:id/save", requireAuth, async (req, res, next) => {
+  try {
+    const lot = await ParkingLot.findById(req.params.id);
+    if (!lot) return res.status(404).json({ error: "Parking lot not found" });
+
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const savedLots = user.saved_lots || [];
+    const lotId = req.params.id;
+    const isSaved = savedLots.includes(lotId);
+
+    if (isSaved) {
+      user.saved_lots = savedLots.filter((id) => id !== lotId);
+    } else {
+      user.saved_lots = [...savedLots, lotId];
+    }
+
+    await user.save();
+    res.json({ saved: !isSaved, lot_id: lotId });
   } catch (err) {
     next(err);
   }

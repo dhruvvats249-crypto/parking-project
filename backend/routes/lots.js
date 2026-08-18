@@ -49,22 +49,55 @@ async function lotWithAvailability(lot, at, until) {
   };
 }
 
-async function searchNearbyLots({ lat, lng, radiusKm = 5, shadeOnly = false, maxPricePerHour = null, at, until }) {
+async function searchNearbyLots({
+  lat,
+  lng,
+  radiusKm = 5,
+  shadeOnly = false,
+  minPricePerHour = null,
+  maxPricePerHour = null,
+  availableOnly = false,
+  is24h = false,
+  hasEvCharging = false,
+  sortBy = "distance", // "distance", "price_asc", "price_desc", "availability"
+  at,
+  until,
+}) {
   const now = new Date();
   const atISO = at || now.toISOString();
   const untilISO = until || new Date(now.getTime() + 60 * 60 * 1000).toISOString();
 
-  const query = shadeOnly ? { has_shade: true } : {};
+  const query = {};
+  if (shadeOnly) query.has_shade = true;
+  if (is24h) query.is_24h = true;
+  if (hasEvCharging) query.has_ev_charging = true;
+
   const allLots = await ParkingLot.find(query);
 
   let lotsInRange = allLots
     .map((lot) => ({ lot, distance_km: distanceKm(lat, lng, lot.lat, lot.lng) }))
     .filter((entry) => entry.distance_km <= radiusKm);
 
+  if (minPricePerHour) {
+    lotsInRange = lotsInRange.filter((entry) => entry.lot.price_per_hour >= minPricePerHour);
+  }
   if (maxPricePerHour) {
     lotsInRange = lotsInRange.filter((entry) => entry.lot.price_per_hour <= maxPricePerHour);
   }
-  lotsInRange.sort((a, b) => a.distance_km - b.distance_km);
+
+  // Sort
+  if (sortBy === "price_asc") {
+    lotsInRange.sort((a, b) => a.lot.price_per_hour - b.lot.price_per_hour);
+  } else if (sortBy === "price_desc") {
+    lotsInRange.sort((a, b) => b.lot.price_per_hour - a.lot.price_per_hour);
+  } else if (sortBy === "availability") {
+    // We'll need to compute availability first for this sort
+    // For now, sort by distance as fallback
+    lotsInRange.sort((a, b) => a.distance_km - b.distance_km);
+  } else {
+    // Default: distance
+    lotsInRange.sort((a, b) => a.distance_km - b.distance_km);
+  }
 
   const result = await Promise.all(
     lotsInRange.map(async ({ lot, distance_km }) => {
@@ -73,19 +106,37 @@ async function searchNearbyLots({ lat, lng, radiusKm = 5, shadeOnly = false, max
       return { ...summary, distance_km: Math.round(distance_km * 100) / 100 };
     })
   );
+
+  // Filter by availability after computing
+  if (availableOnly) {
+    return result.filter((l) => l.available_slots > 0);
+  }
+
+  // Re-sort by availability if requested (after computing availability)
+  if (sortBy === "availability") {
+    result.sort((a, b) => b.available_slots - a.available_slots);
+  }
+
   return result;
 }
 
-// GET /api/lots/nearby?lat=..&lng=..&radius_km=5&shade=true&max_price_per_hour=20&at=ISO&until=ISO
+// GET /api/lots/nearby?lat=..&lng=..&radius_km=5&shade=true&min_price_per_hour=10&max_price_per_hour=20&available_only=true&is_24h=true&has_ev_charging=true&sort_by=price_asc&at=ISO&until=ISO
 router.get("/nearby", async (req, res, next) => {
   try {
     const lat = parseFloat(req.query.lat);
     const lng = parseFloat(req.query.lng);
     const radiusKm = req.query.radius_km ? parseFloat(req.query.radius_km) : 5;
     const shadeOnly = req.query.shade === "true";
+    const minPricePerHour = req.query.min_price_per_hour
+      ? parseFloat(req.query.min_price_per_hour)
+      : null;
     const maxPricePerHour = req.query.max_price_per_hour
       ? parseFloat(req.query.max_price_per_hour)
       : null;
+    const availableOnly = req.query.available_only === "true";
+    const is24h = req.query.is_24h === "true";
+    const hasEvCharging = req.query.has_ev_charging === "true";
+    const sortBy = req.query.sort_by || "distance"; // distance, price_asc, price_desc, availability
 
     if (Number.isNaN(lat) || Number.isNaN(lng)) {
       return res.status(400).json({ error: "lat and lng query params are required" });
@@ -96,7 +147,12 @@ router.get("/nearby", async (req, res, next) => {
       lng,
       radiusKm,
       shadeOnly,
+      minPricePerHour,
       maxPricePerHour,
+      availableOnly,
+      is24h,
+      hasEvCharging,
+      sortBy,
       at: req.query.at,
       until: req.query.until,
     });

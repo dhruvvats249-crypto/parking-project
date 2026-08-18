@@ -8,6 +8,13 @@ import { SkeletonLotCard, SkeletonMap } from "../components/Skeleton";
 
 const DEFAULT_CENTER = { lat: 28.9845, lng: 77.706 }; // Meerut, fallback if geolocation is denied
 
+const SORT_OPTIONS = [
+  { value: "distance", label: "Distance (nearest first)" },
+  { value: "price_asc", label: "Price: Low to High" },
+  { value: "price_desc", label: "Price: High to Low" },
+  { value: "availability", label: "Most Available Spots" },
+];
+
 export default function FindParking() {
   const navigate = useNavigate();
   const routerLocation = useLocation();
@@ -18,7 +25,12 @@ export default function FindParking() {
   const [locating, setLocating] = useState(!presetLocation);
   const [radiusKm, setRadiusKm] = useState(5);
   const [shadeOnly, setShadeOnly] = useState(false);
+  const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [availableOnly, setAvailableOnly] = useState(false);
+  const [is24h, setIs24h] = useState(false);
+  const [hasEvCharging, setHasEvCharging] = useState(false);
+  const [sortBy, setSortBy] = useState("distance");
   const [lots, setLots] = useState([]);
   const [savedLots, setSavedLots] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,6 +39,7 @@ export default function FindParking() {
   const [activeLotId, setActiveLotId] = useState(null);
   const [searchAddr, setSearchAddr] = useState(presetLocation?.label || "");
   const [activeTab, setActiveTab] = useState("nearby"); // "nearby" | "saved"
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (presetLocation) return; // came from the landing page search, already have a location
@@ -59,7 +72,12 @@ export default function FindParking() {
         lng: userLocation.lng,
         radiusKm,
         shade: shadeOnly,
+        minPricePerHour: minPrice ? Number(minPrice) : undefined,
         maxPricePerHour: maxPrice ? Number(maxPrice) : undefined,
+        availableOnly,
+        is24h,
+        hasEvCharging,
+        sortBy,
       });
       setLots(data.lots);
     } catch (err) {
@@ -67,7 +85,7 @@ export default function FindParking() {
     } finally {
       setLoading(false);
     }
-  }, [userLocation, radiusKm, shadeOnly, maxPrice]);
+  }, [userLocation, radiusKm, shadeOnly, minPrice, maxPrice, availableOnly, is24h, hasEvCharging, sortBy]);
 
   const fetchSavedLots = useCallback(async () => {
     if (!token) return;
@@ -82,6 +100,18 @@ export default function FindParking() {
       setLoading(false);
     }
   }, [token]);
+
+  const clearFilters = () => {
+    setShadeOnly(false);
+    setMinPrice("");
+    setMaxPrice("");
+    setAvailableOnly(false);
+    setIs24h(false);
+    setHasEvCharging(false);
+    setSortBy("distance");
+  };
+
+  const hasActiveFilters = shadeOnly || minPrice || maxPrice || availableOnly || is24h || hasEvCharging || sortBy !== "distance";
 
   const handleToggleSave = async (lotId, e) => {
     e.stopPropagation(); // Prevent card click navigation
@@ -194,30 +224,94 @@ export default function FindParking() {
                 ))}
               </select>
             </div>
+
+            {/* Price range */}
+            <div className="search-field" style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+              <div style={{ flex: 1 }}>
+                <label>Min price (₹/hr)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 10"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                  style={{ width: "100px" }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label>Max price (₹/hr)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  placeholder="e.g. 50"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                  style={{ width: "100px" }}
+                />
+              </div>
+            </div>
+
+            {/* Sort dropdown */}
             <div className="search-field">
-              <label>Max price (₹/hr)</label>
-              <input
-                type="number"
-                min="0"
-                step="1"
-                placeholder="e.g. 20"
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(e.target.value)}
-                style={{ width: "100px" }}
-              />
+              <label>Sort by</label>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ minWidth: "200px" }}>
+                {SORT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="search-field checkbox">
-              <input
-                id="shade"
-                type="checkbox"
-                checked={shadeOnly}
-                onChange={(e) => setShadeOnly(e.target.checked)}
-              />
-              <label htmlFor="shade">Shaded spots only</label>
+
+            {/* Filter toggles */}
+            <div className="search-field checkbox" style={{ flexDirection: "row", flexWrap: "wrap", gap: "16px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={shadeOnly}
+                  onChange={(e) => setShadeOnly(e.target.checked)}
+                />
+                <span>⛱ Shaded</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={availableOnly}
+                  onChange={(e) => setAvailableOnly(e.target.checked)}
+                />
+                <span>✅ Available only</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={is24h}
+                  onChange={(e) => setIs24h(e.target.checked)}
+                />
+                <span>🌙 24/7</span>
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={hasEvCharging}
+                  onChange={(e) => setHasEvCharging(e.target.checked)}
+                />
+                <span>⚡ EV Charging</span>
+              </label>
             </div>
-            <button className="btn btn-ghost" onClick={fetchNearbyLots} disabled={loading}>
-              {loading ? "Refreshing..." : "Refresh"}
-            </button>
+
+            {/* Filter actions */}
+            <div style={{ display: "flex", gap: 8, alignItems: "flex-end" }}>
+              <button className="btn btn-ghost" onClick={fetchNearbyLots} disabled={loading}>
+                {loading ? "Refreshing..." : "Refresh"}
+              </button>
+              {hasActiveFilters && (
+                <button className="btn btn-ghost" onClick={clearFilters} style={{ padding: "10px 14px" }}>
+                  Clear filters
+                </button>
+              )}
+            </div>
           </>
         )}
 

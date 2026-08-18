@@ -10,6 +10,9 @@ const parkingLotSchema = new mongoose.Schema({
   lat: { type: Number, required: true },
   lng: { type: Number, required: true },
   has_shade: { type: Boolean, default: false },
+  is_24h: { type: Boolean, default: false },
+  has_ev_charging: { type: Boolean, default: false },
+  max_height_m: { type: Number, default: null }, // height restriction in meters
   price_per_hour: { type: Number, required: true },
   monthly_price: { type: Number, default: null },
   rows: { type: Number, required: true },

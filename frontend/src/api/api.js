@@ -35,10 +35,28 @@ export const api = {
     request("/api/auth/login", { method: "POST", body: { email, password } }),
   me: (token) => request("/api/auth/me", { token }),
 
-  nearbyLots: ({ lat, lng, radiusKm, shade, maxPricePerHour, at, until }) => {
+  nearbyLots: ({
+    lat,
+    lng,
+    radiusKm,
+    shade,
+    minPricePerHour,
+    maxPricePerHour,
+    availableOnly,
+    is24h,
+    hasEvCharging,
+    sortBy,
+    at,
+    until,
+  }) => {
     const params = new URLSearchParams({ lat, lng, radius_km: radiusKm ?? 5 });
     if (shade) params.set("shade", "true");
+    if (minPricePerHour) params.set("min_price_per_hour", String(minPricePerHour));
     if (maxPricePerHour) params.set("max_price_per_hour", String(maxPricePerHour));
+    if (availableOnly) params.set("available_only", "true");
+    if (is24h) params.set("is_24h", "true");
+    if (hasEvCharging) params.set("has_ev_charging", "true");
+    if (sortBy) params.set("sort_by", sortBy);
     if (at) params.set("at", at);
     if (until) params.set("until", until);
     return request(`/api/lots/nearby?${params.toString()}`);

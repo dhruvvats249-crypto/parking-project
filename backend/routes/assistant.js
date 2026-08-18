@@ -10,7 +10,7 @@ const { isSlotFree } = require("./lots");
 
 const router = express.Router();
 
-const MODEL = "llama-3.1-8b-instant";
+const MODEL = "gemma2-9b-it";
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 // --- TOOL DEFINITIONS ---

@@ -2,6 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../api/api";
 
+const VEHICLE_TYPES = [
+  { value: "car", label: "🚗 Car" },
+  { value: "motorcycle", label: "🏍️ Motorcycle" },
+  { value: "suv", label: "🚙 SUV" },
+  { value: "van", label: "🚐 Van" },
+  { value: "other", label: "🚚 Other" },
+];
+
 export default function ManageVehicles() {
   const { token } = useAuth();
   const [vehicles, setVehicles] = useState([]);
@@ -13,6 +21,7 @@ export default function ManageVehicles() {
   const [editingId, setEditingId] = useState(null);
   const [label, setLabel] = useState("");
   const [plate, setPlate] = useState("");
+  const [vehicleType, setVehicleType] = useState("car");
   const [saving, setSaving] = useState(false);
 
   async function load() {
@@ -37,6 +46,7 @@ export default function ManageVehicles() {
     setEditingId(null);
     setLabel("");
     setPlate("");
+    setVehicleType("car");
     setShowForm(true);
   }
 
@@ -44,6 +54,7 @@ export default function ManageVehicles() {
     setEditingId(v.id);
     setLabel(v.label);
     setPlate(v.plate);
+    setVehicleType(v.vehicle_type || "car");
     setShowForm(true);
   }
 
@@ -52,10 +63,11 @@ export default function ManageVehicles() {
     setSaving(true);
     setError(null);
     try {
+      const payload = { label, plate, vehicle_type: vehicleType };
       if (editingId) {
-        await api.updateVehicle(token, editingId, { label, plate });
+        await api.updateVehicle(token, editingId, payload);
       } else {
-        await api.addVehicle(token, { label, plate });
+        await api.addVehicle(token, payload);
       }
       setShowForm(false);
       await load();
@@ -107,9 +119,18 @@ export default function ManageVehicles() {
           {vehicles.map((v) => (
             <div className="panel vehicle-card" key={v.id}>
               {v.is_primary && <span className="vehicle-primary-badge">PRIMARY</span>}
-              <div className="vehicle-card-icon">🚗</div>
+              <div className="vehicle-card-icon">
+                {v.vehicle_type === "motorcycle" ? "🏍️" : v.vehicle_type === "suv" ? "🚙" : v.vehicle_type === "van" ? "🚐" : "🚗"}
+              </div>
               <h3>{v.label}</h3>
               <div className="vehicle-plate">{v.plate}</div>
+              <div className="meta" style={{ fontSize: "0.75rem", marginBottom: 8 }}>
+                {v.vehicle_type === "car" && "🚗 Car"}
+                {v.vehicle_type === "motorcycle" && "🏍️ Motorcycle"}
+                {v.vehicle_type === "suv" && "🚙 SUV"}
+                {v.vehicle_type === "van" && "🚐 Van"}
+                {v.vehicle_type === "other" && "🚚 Other"}
+              </div>
               <div className="vehicle-card-actions">
                 <button className="btn btn-ghost" onClick={() => openEditForm(v)}>
                   ✎ Edit
@@ -177,6 +198,12 @@ export default function ManageVehicles() {
               style={{ fontFamily: "var(--font-mono)" }}
               required
             />
+            <label>Vehicle type</label>
+            <select value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}>
+              {VEHICLE_TYPES.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
             <div className="vehicle-modal-actions">
               <button type="button" className="btn btn-ghost" onClick={() => setShowForm(false)}>
                 Cancel

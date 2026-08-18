@@ -17,6 +17,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CheckIn from "./pages/CheckIn";
 import ScanCheckIn from "./pages/ScanCheckIn";
 import AssistantWidget from "./components/AssistantWidget";
+import PWAInstallPrompt from "./components/PWAInstallPrompt";
 import { ThemeProvider } from "./context/ThemeContext";
 
 export default function App() {
@@ -99,6 +100,7 @@ export default function App() {
         </Routes>
       </main>
       <AssistantWidget />
+        <PWAInstallPrompt />
     </div>
     </ThemeProvider>
   );

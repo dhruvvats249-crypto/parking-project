@@ -140,7 +140,7 @@ export default function Checkout() {
                 <option value="">Type a plate manually...</option>
                 {vehicles.map((v) => (
                   <option key={v.id} value={v.id}>
-                    {v.label} — {v.plate}{v.is_primary ? " (primary)" : ""}
+                    {v.label} — {v.plate} ({v.vehicle_type === "motorcycle" ? "🏍️" : v.vehicle_type === "suv" ? "🚙" : v.vehicle_type === "van" ? "🚐" : "🚗"}){v.is_primary ? " (primary)" : ""}
                   </option>
                 ))}
               </select>

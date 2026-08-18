@@ -7,6 +7,7 @@ const vehicleSchema = new mongoose.Schema({
   user_id: { type: String, required: true, ref: "User" },
   label: { type: String, required: true }, // e.g. "Blue Tesla Model 3"
   plate: { type: String, required: true },
+  vehicle_type: { type: String, enum: ["car", "motorcycle", "suv", "van", "other"], default: "car" },
   is_primary: { type: Boolean, default: false },
   created_at: { type: String, default: () => new Date().toISOString() },
 });

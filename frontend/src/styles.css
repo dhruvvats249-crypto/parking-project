@@ -1051,3 +1051,95 @@ button { font-family: inherit; }
 .skeleton-btn {
   border-radius: 8px;
 }
+
+/* ---------- PWA Install Prompt ---------- */
+.pwa-install-banner {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  pointer-events: none;
+  animation: pwaSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pwa-install-content {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.pwa-install-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.pwa-install-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pwa-install-text strong {
+  font-size: 0.92rem;
+  color: var(--ink);
+}
+
+.pwa-install-text span {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+.pwa-install-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pwa-install-dismiss {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+@keyframes pwaSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .pwa-install-banner {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+  }
+  .pwa-install-content {
+    padding: 12px 14px;
+  }
+  .pwa-install-text strong {
+    font-size: 0.85rem;
+  }
+  .pwa-install-text span {
+    font-size: 0.72rem;
+  }
+}

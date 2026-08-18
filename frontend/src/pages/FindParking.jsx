@@ -196,7 +196,7 @@ export default function FindParking() {
             disabled={!token}
             title={!token ? "Log in to view saved lots" : ""}
           >
-            ❤️ Saved
+            Saved
           </button>
         </div>
 
